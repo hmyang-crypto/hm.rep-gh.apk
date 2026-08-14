@@ -6,7 +6,7 @@
 [app]
 
 # (str) Title of your application
-title = 보충 WMS
+title = XFC 보충어플
 
 # (str) Package name
 package.name = myapp
