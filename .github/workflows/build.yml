@@ -41,6 +41,7 @@ jobs:
         ANDROID_NDK_LATEST_HOME: ''
         ANDROID_NDK_ROOT: ''
       run: |
+        buildozer android clean
         buildozer -v android debug
 
     - name: Upload APK Artifact
