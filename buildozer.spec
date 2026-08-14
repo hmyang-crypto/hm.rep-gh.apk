@@ -19,7 +19,7 @@ source.include_exts = py,png,jpg,kv,json,ttf,otf
 version = 0.1
 
 # (list) Application requirements
-requirements = python3,kivy,gspread,oauth2client,httplib2,pyparsing,six
+requirements = python3,kivy,gspread,pyparsing,six
 
 # (list) Supported orientations
 orientation = portrait
