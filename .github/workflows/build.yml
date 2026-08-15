@@ -19,15 +19,29 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install exact build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git zip unzip autoconf automake libtool pkg-config zlib1g-dev libffi-dev libssl-dev build-essential
+        python -m pip install --upgrade "pip<24.1" "setuptools<66.0.0" "wheel"
+        pip install "cython==0.29.36" "buildozer==1.5.0"
+
     - name: Create Google Key File
       run: |
         echo "${{ secrets.GOOGLE_KEY_JSON }}" > replacement-463907-07ae6e152f37.json
 
-    - name: Build with Buildozer Action
-      uses: ArtemisS3/action-buildozer@v1
-      with:
-        command: buildozer -v android debug
-        subpath: '.'
+    - name: Build with Buildozer
+      env:
+        ANDROID_NDK_HOME: ''
+        ANDROID_NDK_LATEST_HOME: ''
+        ANDROID_NDK_ROOT: ''
+      run: |
+        buildozer -v android debug
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
