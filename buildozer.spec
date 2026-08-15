@@ -55,7 +55,7 @@ android.archs = arm64-v8a
 android.allow_backup = True
 
 # Python for android (p4a) specific
-p4a.branch = master
+p4a.branch = release-2024.01.21
 
 # iOS specific
 ios.kivy_ios_url = https://github.com/kivy/kivy-ios
