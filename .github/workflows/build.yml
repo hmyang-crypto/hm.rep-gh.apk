@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Checkout code
@@ -19,30 +19,15 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y git zip unzip autoconf automake libtool pkg-config zlib1g-dev libffi-dev libssl-dev build-essential
-        python -m pip install --upgrade pip "setuptools<66.0.0"
-        pip install "cython<3.0.0" buildozer
-
     - name: Create Google Key File
       run: |
         echo "${{ secrets.GOOGLE_KEY_JSON }}" > replacement-463907-07ae6e152f37.json
 
-    - name: Clean & Build with Buildozer
-      env:
-        ANDROID_NDK_HOME: ''
-        ANDROID_NDK_LATEST_HOME: ''
-        ANDROID_NDK_ROOT: ''
-      run: |
-        rm -rf .buildozer
-        buildozer -v android debug
+    - name: Build with Buildozer Action
+      uses: ArtemisS3/action-buildozer@v1
+      with:
+        command: buildozer -v android debug
+        subpath: '.'
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
