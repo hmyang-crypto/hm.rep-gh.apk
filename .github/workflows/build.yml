@@ -33,7 +33,9 @@ jobs:
 
     - name: Create Google Key File
       run: |
-        echo "${{ secrets.GOOGLE_KEY_JSON }}" > replacement-463907-07ae6e152f37.json
+        cat << 'EOF' > replacement-463907-07ae6e152f37.json
+        ${{ secrets.GOOGLE_KEY_JSON }}
+        EOF
 
     - name: Clean & Build
       env:
