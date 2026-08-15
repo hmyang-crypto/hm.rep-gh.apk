@@ -19,8 +19,7 @@ source.include_exts = py,png,jpg,kv,json,ttf,otf
 version = 0.1
 
 # (list) Application requirements
-requirements = python3,kivy,gspread,google-auth,google-auth-httplib2,google-auth-oauthlib,oauth2client,httplib2,requests,requests-oauthlib,oauthlib,charset_normalizer,cryptography,pyasn1,pyasn1_modules,urllib3,certifi,idna,pyparsing,six
-
+requirements = python3,kivy,gspread,google-auth,google-auth-httplib2,google-auth-oauthlib,oauth2client,httplib2,rsa,cachetools,requests,requests-oauthlib,oauthlib,charset_normalizer,cryptography,pyasn1,pyasn1_modules,urllib3,certifi,idna,pyparsing,six
 # (list) Supported orientations
 orientation = portrait
 
