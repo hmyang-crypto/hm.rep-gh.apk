@@ -1,32 +1,30 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime, timedelta
+from functools import partial
 import json
 import os
 import re
-import ssl  # 👈 SSL 모듈
+import ssl
 import sys
 import threading
 import time
 import traceback
 import urllib.request
-from datetime import datetime, timedelta
-from functools import partial
 
 # 💡 GitHub Raw 주소
 UPDATE_CHECK_URL = "https://raw.githubusercontent.com/hmyang-crypto/hm-rep/refs/heads/main/version.txt"
 UPDATE_CODE_URL = "https://raw.githubusercontent.com/hmyang-crypto/hm-rep/refs/heads/main/main.py"
-CURRENT_VERSION = "1.0.0"
+CURRENT_VERSION = "1.0.1"
 
 
 def check_and_apply_update():
     try:
         print("🔍 서버에서 최신 업데이트 확인 중...")
-
-        # 💡 안드로이드 SSL 인증서 검증 우회 설정
         ssl_context = ssl._create_unverified_context()
-
         req = urllib.request.Request(
             UPDATE_CHECK_URL, headers={"User-Agent": "Mozilla/5.0"}
         )
+
         with urllib.request.urlopen(
             req, timeout=5, context=ssl_context
         ) as response:
@@ -44,28 +42,58 @@ def check_and_apply_update():
                         code_req, timeout=10, context=ssl_context
                     ) as new_code_response:
                         if new_code_response.status == 200:
-                            current_file_path = os.path.abspath(__file__)
+                            app_dir = os.path.dirname(
+                                os.path.abspath(__file__)
+                            )
+                            updated_file_path = os.path.join(
+                                app_dir, "updated_main.py"
+                            )
+
+                            # 💡 main.py를 직접 덮어쓰지 않고 별도 파일로 안전하게 저장
                             with open(
-                                current_file_path, "w", encoding="utf-8"
+                                updated_file_path, "w", encoding="utf-8"
                             ) as f:
                                 f.write(
                                     new_code_response.read().decode("utf-8")
                                 )
-                            print("✅ main.py 최신화 완료!")
+
+                            print(
+                                "✅ updated_main.py 최신 스크립트 저장 완료!"
+                            )
     except Exception as e:
         print(f"⚠️ 업데이트 확인 중 오류 (무시하고 앱 실행): {e}")
 
 
+# 1. 업데이트 다운로드 체크
 check_and_apply_update()
+
+# 2. 💡 [Bad magic number 완벽 예방] updated_main.py가 존재하면 exec로 우회 실행
+_app_dir = os.path.dirname(os.path.abspath(__file__))
+_updated_script = os.path.join(_app_dir, "updated_main.py")
+
+if os.path.exists(_updated_script) and __name__ == "__main__":
+    try:
+        print("🔄 최신 업데이트 스크립트(updated_main.py)로 실행합니다...")
+        with open(_updated_script, "r", encoding="utf-8") as _f:
+            _code = _f.read()
+        exec(
+            compile(_code, _updated_script, "exec"),
+            {"__name__": "__main__", "__file__": _updated_script},
+        )
+        sys.exit(0)
+    except Exception as _exec_err:
+        print(
+            f"⚠️ 업데이트 코드 실행 실패 (기본 main.py로 대체 실행): {_exec_err}"
+        )
 
 from kivy.animation import Animation
 from kivy.app import App
 from kivy.clock import Clock
-from kivy.lang import Builder
 from kivy.core.text import LabelBase
 from kivy.core.window import Window
 from kivy.factory import Factory
 from kivy.graphics import Color, Rectangle, RoundedRectangle
+from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.properties import (
     BooleanProperty,
@@ -1135,7 +1163,13 @@ class UnifiedTaskCard(RecycleDataViewBehavior, BoxLayout):
         self.card_screen = data.get("card_screen", None)
 
         raw_equip = str(t(self.task_data, "장비", ""))
-        display_tag = "[color=0000FF](전량출)[/color] " if raw_equip == "리치" else ""
+        if raw_equip == "리치":
+            display_tag = "[color=0000FF][리치][/color] "
+        elif raw_equip == "오더피커":
+            display_tag = "[color=1E88E5][오더피커][/color] "
+        else:
+            display_tag = ""
+
         is_urgent = self.task_data.get("긴급여부") == "Y"
         is_shelf_rack = t(self.task_data, "선반랙 여부", "").upper() == "Y"
 
@@ -1203,7 +1237,7 @@ class UnifiedReplenishScreen(Screen):
         self.only_urgent = False
         self.selected_from_zone = "전체"
         self.selected_to_zone = "전체"
-        self.is_filter_expanded = True  # 💡 [해결1] 기본 상태를 펼침(True)으로 설정!
+        self.is_filter_expanded = True
 
         self.raw_all_tasks = []
         self.checked_task_ids = set()
@@ -1376,7 +1410,6 @@ class UnifiedReplenishScreen(Screen):
         opt_toolbar.add_widget(chk_box)
         self.filter_panel.add_widget(opt_toolbar)
 
-        # 💡 [해결1] 처음 생성 시 필터 패널을 헤더 바로 아래에 정상 추가
         self.layout.add_widget(self.filter_panel)
 
         # 4. 리스트 상태 헤더 (대기 작업 : 0건 / 전체선택)
@@ -1446,13 +1479,11 @@ class UnifiedReplenishScreen(Screen):
 
         self.add_widget(self.layout)
 
-    # 💡 [해결2] Kivy 인덱스 순서 정밀 조정 (index=len(children)-2 지정)
     def toggle_filter_panel(self, instance=None):
         self.is_filter_expanded = not self.is_filter_expanded
 
         if self.is_filter_expanded:
             if self.filter_panel not in self.layout.children:
-                # Kivy 역순 구조에 맞춰 btn_toggle_filter(위에서2번째) 바로 아래로 삽입!
                 target_idx = len(self.layout.children) - 2
                 self.layout.add_widget(self.filter_panel, index=target_idx)
             self._update_filter_button_text("닫기 ▲")
@@ -1485,7 +1516,6 @@ class UnifiedReplenishScreen(Screen):
         self.btn_eq_op.set_active_visual(False)
         self.btn_eq_reach.set_active_visual(False)
 
-        # 💡 [해결1] 진입할 때도 펼침 상태(True)를 유지하도록 수정!
         self.is_filter_expanded = True
         if self.filter_panel not in self.layout.children:
             target_idx = len(self.layout.children) - 2
@@ -1818,6 +1848,7 @@ class UnifiedReplenishScreen(Screen):
             task_list_screen.prompt_for_remarks(dummy_card)
         elif action_name == "complete":
             task_list_screen.process_task(dummy_card)
+
 
 # --- 검수 및 액션 처리 전용 화면 ---
 class TaskListScreen(Screen):
@@ -2594,7 +2625,6 @@ class BluetoothPrinter:
         if self.socket:
             self.socket.close()
 
-    # 💡 예전 원본 인쇄 좌표/크기/폼 레이아웃 100% 복원
     def print_outbound_label_cpcl(self, label_info: dict, quantity: int):
         if not self.stream:
             return False
@@ -2613,7 +2643,6 @@ class BluetoothPrinter:
         if is_invoice:
             tag_str += "[송장만부착]"
 
-        # --- 원본 CPCL 좌표 및 명령어 적용 ---
         cmd = f"! 0 200 200 800 {quantity}\r\n"
 
         if tag_str:
