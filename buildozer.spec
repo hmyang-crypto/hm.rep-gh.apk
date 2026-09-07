@@ -1,13 +1,13 @@
 [app]
 
 # (str) Title of your application
-title = XFC 보충 어플
+title = 보충 테스트 어플
 
 # (str) Package name
-package.name = myapp
+package.name = repapptest
 
 # (str) Package domain (needed for android/ios packaging)
-package.domain = org.test
+package.domain = com.hm.test
 
 # (str) Source code where the main.py live
 source.dir = .
