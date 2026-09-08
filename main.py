@@ -11,10 +11,10 @@ import urllib.request
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta
 
-# 💡 GitHub Raw 주소 (기존 업데이트 로직 원본 유지)
+# 💡 GitHub Raw 주소
 UPDATE_CHECK_URL = "https://raw.githubusercontent.com/hmyang-crypto/hm-rep/refs/heads/main/version.txt"
 UPDATE_CODE_URL = "https://raw.githubusercontent.com/hmyang-crypto/hm-rep/refs/heads/main/main.py"
-CURRENT_VERSION = "2.1.0"
+CURRENT_VERSION = "2.1.2"
 
 
 def check_and_apply_update():
@@ -1633,6 +1633,7 @@ class NameEntryScreen(Screen):
 
     def on_enter(self, *args):
         app = App.get_running_app()
+        # 💡 [핵심] 기존에 사용하던 이름을 그대로 가져와서 입력창에 세팅해 둡니다.
         saved_name = app.load_saved_user_name()
         if saved_name:
             self.name_input.text = saved_name
@@ -1982,7 +1983,7 @@ class MainMenuScreen(Screen):
 
         self.layout.add_widget(perf_card)
 
-        # 메인 메뉴 버튼들 (💡 [원복] 원복 작업 버튼 추가)
+        # 메인 메뉴 버튼들
         menu_box = BoxLayout(
             orientation="vertical", spacing=dp(6), size_hint_y=None
         )
@@ -3015,7 +3016,6 @@ class ReturnExecutionPopup(Popup):
             loc = target_loc if target_loc else "J01-02-5-02,J01-02-4-02"
             self.handle_scanned_code(loc)
 
-    # 💡 정식 빌드형 네이티브 카메라 앱 연동 (FileProvider 기반)
     def take_photo(self, instance):
         if not self.scanned_location:
             App.get_running_app().show_info_popup(
@@ -3068,7 +3068,6 @@ class ReturnExecutionPopup(Popup):
             except Exception as e:
                 print(f"🔴 실물 카메라 구동 오류 (폴백 진행): {e}")
 
-        # PC / 테스트 구동 환경용 폴백
         try:
             with open(self.photo_file_path, "wb") as f:
                 f.write(b"IMAGE_DATA")
@@ -4580,6 +4579,7 @@ class MainApp(App):
         sm.add_widget(CompletedHistoryScreen(name="completed_history"))
         sm.add_widget(SettingsScreen(name="settings"))
 
+        # 💡 [핵심] 앱 시작 시 무조건 로그인 화면(name_entry)으로 진입하도록 강제 고정합니다.
         sm.current = "name_entry"
 
         return sm
