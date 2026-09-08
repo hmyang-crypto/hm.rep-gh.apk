@@ -148,9 +148,6 @@ if platform == "android":
 
 if platform == "android":
     Window.softinput_mode = "below_target"
-    from android.permissions import Permission, request_permissions
-    from android.runnable import run_on_ui_thread
-    from jnius import JavaException, PythonJavaClass, autoclass, java_method
 
 import gspread
 from gspread.exceptions import APIError
@@ -293,7 +290,7 @@ def open_native_korean_input(
 ):
     if platform == "android":
         try:
-            from jnius import autoclass
+            from jnius import JavaException, PythonJavaClass, autoclass, java_method
 
             PythonActivity = autoclass("org.kivy.android.PythonActivity")
             AlertDialog = autoclass("android.app.AlertDialog$Builder")
@@ -1633,7 +1630,6 @@ class NameEntryScreen(Screen):
 
     def on_enter(self, *args):
         app = App.get_running_app()
-        # 💡 [핵심] 기존에 사용하던 이름을 그대로 가져와서 입력창에 세팅해 둡니다.
         saved_name = app.load_saved_user_name()
         if saved_name:
             self.name_input.text = saved_name
@@ -1957,7 +1953,7 @@ class MainMenuScreen(Screen):
             markup=True,
             halign="left",
             valign="middle",
-            shorten=True,
+ shortShorten=True,
             shorten_from="right",
             size_hint_y=None,
             height=dp(18),
@@ -2147,9 +2143,7 @@ class MainMenuScreen(Screen):
         app = App.get_running_app()
         app.current_list_type = "검수인원"
         self.manager.current = "task_list"
-
-
-# --- [원복 Task Card UI] ---
+        # --- [원복 Task Card UI] ---
 class ReturnTaskCard(RecycleDataViewBehavior, BoxLayout):
     index = NumericProperty(0)
     task_data = DictProperty({})
@@ -3194,7 +3188,9 @@ class ReturnExecutionPopup(Popup):
 
         threading.Thread(target=_async_finalize, daemon=True).start()
         self.dismiss()
-        # --- 검수 및 액션 처리 전용 화면 ---
+
+
+# --- 검수 및 액션 처리 전용 화면 ---
 class TaskListScreen(Screen):
 
     def __init__(self, **kwargs):
@@ -4140,9 +4136,10 @@ class PrinterSettingsPopup(Popup):
         self.content = layout
 
     def scan_devices(self, instance):
-        if platform != "android" or not autoclass:
+        if platform != "android":
             return
         try:
+            from jnius import autoclass
             adapter = autoclass(
                 "android.bluetooth.BluetoothAdapter"
             ).getDefaultAdapter()
@@ -4182,6 +4179,7 @@ class BluetoothPrinter:
 
         for attempt in range(2):
             try:
+                from jnius import autoclass
                 BluetoothAdapter = autoclass(
                     "android.bluetooth.BluetoothAdapter"
                 )
@@ -4629,6 +4627,7 @@ class MainApp(App):
 
         if platform == "android":
             try:
+                from android.permissions import Permission, request_permissions
                 request_permissions(
                     [
                         Permission.CAMERA,
@@ -4694,6 +4693,7 @@ class MainApp(App):
         if platform != "android":
             return
         try:
+            from jnius import autoclass
             PythonActivity = autoclass("org.kivy.android.PythonActivity")
             RingtoneManager = autoclass("android.media.RingtoneManager")
             context = PythonActivity.mActivity.getApplicationContext()
