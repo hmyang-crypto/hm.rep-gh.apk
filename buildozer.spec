@@ -1,13 +1,13 @@
 [app]
 
 # (str) Title of your application
-title = 보충 테스트 어플
+title = XFC 보충어플
 
 # (str) Package name
-package.name = repapptest
+package.name = repapp
 
 # (str) Package domain (needed for android/ios packaging)
-package.domain = com.hm.test
+package.domain = com.hm
 
 # (str) Source code where the main.py live
 source.dir = .
@@ -16,10 +16,11 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,json,ttf,otf
 
 # (str) Application versioning (method 1)
-version = 0.1
+version = 2.1.0
 
 # (list) Application requirements
 requirements = python3,kivy,gspread,google-auth,google-auth-httplib2,google-auth-oauthlib,oauth2client,httplib2,rsa,cachetools,requests,requests-oauthlib,oauthlib,charset_normalizer,cryptography,pyasn1,pyasn1_modules,urllib3,certifi,idna,pyparsing,six
+
 # (list) Supported orientations
 orientation = portrait
 
@@ -29,8 +30,11 @@ osx.kivy_version = 2.2.0
 # (bool) Indicate if the application should be fullscreen or not
 fullscreen = 0
 
-# (list) Permissions
-android.permissions = INTERNET,ACCESS_FINE_LOCATION,ACCESS_COARSE_LOCATION,POST_NOTIFICATIONS,BLUETOOTH_SCAN,BLUETOOTH_CONNECT,BLUETOOTH_ADMIN
+# (list) Permissions (카메라 및 외부 저장소 권한 포함)
+android.permissions = INTERNET,CAMERA,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE,ACCESS_FINE_LOCATION,ACCESS_COARSE_LOCATION,POST_NOTIFICATIONS,BLUETOOTH_SCAN,BLUETOOTH_CONNECT,BLUETOOTH_ADMIN
+
+# (list) Gradle dependencies (FileProvider 및 카메라 호환용)
+android.gradle_dependencies = androidx.core:core:1.10.1
 
 # (int) Target Android API
 android.api = 33
